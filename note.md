@@ -1,4 +1,5 @@
-# Git基础
+# Git入门
+## 第一章 Git连接Github
 
 [详细见Git教程](https://www.liaoxuefeng.com/wiki/896043488029600)
 
@@ -105,9 +106,7 @@ $ git add file2.txt file3.txt
 $ git commit -m "add 3 files."
 ```
 
-### 四、时光穿梭机
-
-### 五、远程仓库
+### 四、远程仓库
 
 世界上有个叫[GitHub](https://github.com/)的神奇的网站，从名字就可以看出，这个网站就是提供Git仓库托管服务的，所以，只要注册一个GitHub账号，就可以免费获得Git远程仓库。
 
@@ -197,3 +196,155 @@ $ git push origin master
 ```
 
 把本地`master`分支的最新修改推送至GitHub，现在，你就拥有了真正的分布式版本库！
+
+##  第二章 Git功能
+
+### 一、文件管理 
+
+#### 1. 文件比较
+
+我们已经成功地添加并提交了一个readme.txt文件，现在，是时候继续工作了，于是，我们继续修改readme.txt文件，改成如下内容：
+
+```txt
+Git is a distributed version control system.
+Git is free software.
+```
+
+现在，运行`git status`命令看看结果：
+
+```console
+$ git status
+On branch master
+Changes not staged for commit:
+  (use "git add <file>..." to update what will be committed)
+  (use "git checkout -- <file>..." to discard changes in working directory)
+
+	modified:   readme.txt
+
+no changes added to commit (use "git add" and/or "git commit -a")
+```
+
+`git status`命令可以让我们时刻掌握仓库当前的状态，上面的命令输出告诉我们，`readme.txt`被修改过了，但还没有准备提交的修改。
+
+虽然Git告诉我们`readme.txt`被修改了，但如果能看看具体修改了什么内容，自然是很好的。比如你休假两周从国外回来，第一天上班时，已经记不清上次怎么修改的`readme.txt`，所以，需要用`git diff`这个命令看看：
+
+```console
+$ git diff readme.txt 
+diff --git a/readme.txt b/readme.txt
+index 46d49bf..9247db6 100644
+--- a/readme.txt
++++ b/readme.txt
+@@ -1,2 +1,2 @@
+-Git is a version control system.
++Git is a distributed version control system.
+ Git is free software.
+```
+
+`git diff`顾名思义就是查看difference，显示的格式正是Unix通用的diff格式，可以从上面的命令输出看到，我们在第一行添加了一个`distributed`单词。
+
+知道了对`readme.txt`作了什么修改后，再把它提交到仓库就放心多了，提交修改和提交新文件是一样的两步，第一步是`git add`：
+
+```console
+$ git add readme.txt
+```
+
+同样没有任何输出。在执行第二步`git commit`之前，我们再运行`git status`看看当前仓库的状态：
+
+```console
+$ git status
+On branch master
+Changes to be committed:
+  (use "git reset HEAD <file>..." to unstage)
+
+	modified:   readme.txt
+```
+
+`git status`告诉我们，将要被提交的修改包括`readme.txt`，下一步，就可以放心地提交了：
+
+```console
+$ git commit -m "add distributed"
+[master e475afc] add distributed
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+```
+
+提交后，我们再用`git status`命令看看仓库的当前状态：
+
+```console
+$ git status
+On branch master
+nothing to commit, working tree clean
+```
+
+Git告诉我们当前没有需要提交的修改，而且，工作目录是干净（working tree clean）的。
+
+#### 2. 版本控制
+
+现在，我们回顾一下`readme.txt`文件一共有几个版本被提交到Git仓库里了：
+
+版本1：wrote a readme file
+
+```
+Git is a version control system.
+Git is free software.
+```
+
+版本2：add distributed
+
+```
+Git is a distributed version control system.
+Git is free software.
+```
+
+版本3：append GPL
+
+```
+Git is a distributed version control system.
+Git is free software distributed under the GPL.
+```
+
+当然了，在实际工作中，我们脑子里怎么可能记得一个几千行的文件每次都改了什么内容，不然要版本控制系统干什么。版本控制系统肯定有某个命令可以告诉我们历史记录，在Git中，我们用`git log`命令查看：
+
+```
+$ git log
+commit 1094adb7b9b3807259d8cb349e7df1d4d6477073 (HEAD -> master)
+Author: Michael Liao <askxuefeng@gmail.com>
+Date:   Fri May 18 21:06:15 2018 +0800
+
+    append GPL
+
+commit e475afc93c209a690c39c13a46716e8fa000c366
+Author: Michael Liao <askxuefeng@gmail.com>
+Date:   Fri May 18 21:03:36 2018 +0800
+
+    add distributed
+
+commit eaadf4e385e865d25c48e7ca9c8395c3f7dfaef0
+Author: Michael Liao <askxuefeng@gmail.com>
+Date:   Fri May 18 20:59:18 2018 +0800
+
+    wrote a readme file
+```
+
+`git log`命令显示从最近到最远的提交日志，我们可以看到3次提交，最近的一次是`append GPL`，上一次是`add distributed`，最早的一次是`wrote a readme file`。
+
+如果嫌输出信息太多，看得眼花缭乱的，可以试试加上`--pretty=oneline`参数：
+
+```
+$ git log --pretty=oneline
+1094adb7b9b3807259d8cb349e7df1d4d6477073 (HEAD -> master) append GPL
+e475afc93c209a690c39c13a46716e8fa000c366 add distributed
+eaadf4e385e865d25c48e7ca9c8395c3f7dfaef0 wrote a readme file
+```
+
+需要友情提示的是，你看到的一大串类似`1094adb...`的是`commit id`（版本号），和SVN不一样，Git的`commit id`不是1，2，3……递增的数字，而是一个SHA1计算出来的一个非常大的数字，用十六进制表示，而且你看到的`commit id`和我的肯定不一样，以你自己的为准。为什么`commit id`需要用这么一大串数字表示呢？因为Git是分布式的版本控制系统，后面我们还要研究多人在同一个版本库里工作，如果大家都用1，2，3……作为版本号，那肯定就冲突了。
+
+好了，现在我们启动时光穿梭机，准备把`readme.txt`回退到上一个版本，也就是`add distributed`的那个版本，怎么做呢？
+
+首先，Git必须知道当前版本是哪个版本，在Git中，用`HEAD`表示当前版本，也就是最新的提交`1094adb...`（注意我的提交ID和你的肯定不一样），上一个版本就是`HEAD^`，上上一个版本就是`HEAD^^`，当然往上100个版本写100个`^`比较容易数不过来，所以写成`HEAD~100`。
+
+现在，我们要把当前版本`append GPL`回退到上一个版本`add distributed`，就可以使用`git reset`命令：
+
+```
+$ git reset --hard HEAD^
+HEAD is now at e475afc add distributed
+```
