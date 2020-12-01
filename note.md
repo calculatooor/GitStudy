@@ -112,7 +112,7 @@ $ git commit -m "add 3 files."
 
 由于你的本地Git仓库和GitHub仓库之间的传输是通过SSH加密的，所以，需要一点设置：
 
-#### 1. 基础设置
+#### 1. 基础设置(本地仓库上传)
 
 [详细见:Git与Github的连接连接使用](https://www.cnblogs.com/flora5/p/7152556.html)
 
@@ -196,6 +196,20 @@ $ git push origin master
 ```
 
 把本地`master`分支的最新修改推送至GitHub，现在，你就拥有了真正的分布式版本库！
+
+#### 2. 从远程仓库克隆
+
+用命令`git clone`克隆一个本地库：
+
+```git
+$ git clone git@github.com:michaelliao/gitskills.git
+Cloning into 'gitskills'...
+remote: Counting objects: 3, done.
+remote: Total 3 (delta 0), reused 0 (delta 0), pack-reused 3
+Receiving objects: 100% (3/3), done.
+```
+
+
 
 ##  第二章 Git功能
 
@@ -693,4 +707,245 @@ $ git checkout -- test.txt
  注意：从来没有被添加到版本库就被删除的文件，是无法恢复的！
 
 ### 二、分支管理
+
+#### 1. 创建与更新分支
+
+`HEAD`严格来说不是指向提交，而是指向`master`，`master`才是指向提交的。
+
+下面开始实战。
+
+首先，我们创建`dev`分支，然后切换到`dev`分支：
+
+```
+$ git checkout -b dev
+Switched to a new branch 'dev'
+```
+
+`git checkout`命令加上`-b`参数表示创建并切换，相当于以下两条命令：
+
+```
+$ git branch dev
+$ git checkout dev
+Switched to branch 'dev'
+```
+
+然后，用`git branch`命令查看当前分支：
+
+```
+$ git branch
+* dev
+  master
+```
+
+`git branch`命令会列出所有分支，当前分支前面会标一个`*`号。
+
+我们可以在`dev`分支上工作，把`dev`分支上的工作成果合并到`master`分支上：
+
+```
+$ git merge dev
+Updating d46f35e..b17d20e
+Fast-forward
+ readme.txt | 1 +
+ 1 file changed, 1 insertion(+)
+```
+
+当然，也不是每次合并都能`Fast-forward`，我们后面会讲其他方式的合并。
+
+合并完成后，就可以放心地删除`dev`分支了：
+
+```git
+$ git branch -d dev
+Deleted branch dev (was b17d20e).
+```
+
+switch
+
+我们注意到切换分支使用`git checkout <branch>`，而前面讲过的撤销修改则是`git checkout -- <file>`，同一个命令，有两种作用，确实有点令人迷惑。
+
+实际上，切换分支这个动作，用`switch`更科学。因此，最新版本的Git提供了新的`git switch`命令来切换分支：
+
+创建并切换到新的`dev`分支，可以使用：
+
+```
+$ git switch -c dev
+```
+
+直接切换到已有的`master`分支，可以使用：
+
+```
+$ git switch master
+```
+
+使用新的`git switch`命令，比`git checkout`要更容易理解。
+
+小结
+
+Git鼓励大量使用分支：
+
+查看分支：`git branch`
+
+创建分支：`git branch <name>`
+
+切换分支：`git checkout <name>`或者`git switch <name>`
+
+创建+切换分支：`git checkout -b <name>`或者`git switch -c <name>`
+
+合并某分支到当前分支：`git merge <name>`
+
+删除分支：`git branch -d <name>`
+
+#### 2. 合并分支(解决冲突)
+
+当有多个分支，且分支做了不同的修改时，会变成这样：
+
+![](http://117.78.7.207:6789/imgs/2020/11/e4672cf7d6de9507.png)
+
+这种情况下，Git无法执行“快速合并”，只能试图把各自的修改合并起来，但这种合并就可能会有冲突，我们试试看：
+
+```git
+$ git merge feature1
+Auto-merging readme.txt
+CONFLICT (content): Merge conflict in readme.txt
+Automatic merge failed; fix conflicts and then commit the result.
+```
+
+果然冲突了！Git告诉我们，readme.txt文件存在冲突，必须手动解决冲突后再提交。git status也可以告诉我们冲突的文件：
+```git
+$ git status
+On branch master
+Your branch is ahead of 'origin/master' by 2 commits.
+  (use "git push" to publish your local commits)
+
+You have unmerged paths.
+  (fix conflicts and run "git commit")
+  (use "git merge --abort" to abort the merge)
+
+Unmerged paths:
+  (use "git add <file>..." to mark resolution)
+
+	both modified:   readme.txt
+
+no changes added to commit (use "git add" and/or "git commit -a")
+```
+我们可以直接查看readme.txt的内容：
+```git
+Git is a distributed version control system.
+Git is free software distributed under the GPL.
+Git has a mutable index called stage.
+Git tracks changes of files.
+<<<<<<< HEAD
+Creating a new branch is quick & simple.
+=======
+Creating a new branch is quick AND simple.
+>>>>>>> feature1
+```
+Git用`<<<<<<<，=======，>>>>>>>`标记出不同分支的内容，我们修改如下后保存：
+
+`Creating a new branch is quick and simple.`
+再提交：
+```git
+$ git add readme.txt 
+$ git commit -m "conflict fixed"
+[master cf810e4] conflict fixed
+```
+现在，master分支和feature1分支变成了下图所示：
+
+![](http://117.78.7.207:6789/imgs/2020/11/cb768f68ecfc0804.png)
+
+用带参数的`git log`也可以看到分支的合并情况：
+
+```git
+$ git log --graph --pretty=oneline --abbrev-commit
+*   cf810e4 (HEAD -> master) conflict fixed
+|\  
+| * 14096d0 (feature1) AND simple
+* | 5dc6824 & simple
+|/  
+* b17d20e branch test
+* d46f35e (origin/master) remove test.txt
+* b84166e add test.txt
+* 519219b git tracks changes
+* e43a48b understand how stage works
+* 1094adb append GPL
+* e475afc add distributed
+* eaadf4e wrote a readme file
+```
+
+用`git log --graph`命令可以看到分支合并图。
+
+#### 3.分支管理策略
+
+通常，合并分支时，如果可能，Git会用`Fast forward`模式，但这种模式下，删除分支后，会丢掉分支信息。
+
+如果要强制禁用`Fast forward`模式，Git就会在merge时生成一个新的commit，这样，从分支历史上就可以看出分支信息。
+
+下面我们实战一下`--no-ff`方式的`git merge`：
+
+首先，仍然创建并切换`dev`分支：
+
+```
+$ git switch -c dev
+Switched to a new branch 'dev'
+```
+
+修改readme.txt文件，并提交一个新的commit：
+
+```
+$ git add readme.txt 
+$ git commit -m "add merge"
+[dev f52c633] add merge
+ 1 file changed, 1 insertion(+)
+```
+
+现在，我们切换回`master`：
+
+```
+$ git switch master
+Switched to branch 'master'
+```
+
+准备合并`dev`分支，请注意`--no-ff`参数，表示禁用`Fast forward`：
+
+```
+$ git merge --no-ff -m "merge with no-ff" dev
+Merge made by the 'recursive' strategy.
+ readme.txt | 1 +
+ 1 file changed, 1 insertion(+)
+```
+
+因为本次合并要创建一个新的commit，所以加上`-m`参数，把commit描述写进去。
+
+合并后，我们用`git log`看看分支历史：
+
+```
+$ git log --graph --pretty=oneline --abbrev-commit
+*   e1e9c68 (HEAD -> master) merge with no-ff
+|\  
+| * f52c633 (dev) add merge
+|/  
+*   cf810e4 conflict fixed
+...
+```
+
+可以看到，不使用`Fast forward`模式，merge后就像这样：
+
+![](http://117.78.7.207:6789/imgs/2020/11/b7954a837df7139d.png)
+
+分支策略
+
+在实际开发中，我们应该按照几个基本原则进行分支管理：
+
+首先，`master`分支应该是非常稳定的，也就是仅用来发布新版本，平时不能在上面干活；
+
+那在哪干活呢？干活都在`dev`分支上，也就是说，`dev`分支是不稳定的，到某个时候，比如1.0版本发布时，再把`dev`分支合并到`master`上，在`master`分支发布1.0版本；
+
+你和你的小伙伴们每个人都在`dev`分支上干活，每个人都有自己的分支，时不时地往`dev`分支上合并就可以了。
+
+所以，团队合作的分支看起来就像这样：
+
+![](http://117.78.7.207:6789/imgs/2020/11/2e66bb0030802f7f.png)
+
+
+
+[github上fork了别人的项目后，再同步更新别人的提交](https://blog.csdn.net/qq1332479771/article/details/56087333)
 
