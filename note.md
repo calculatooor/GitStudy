@@ -17,7 +17,7 @@ Git是分布式版本控制系统
 
 和集中式版本控制系统相比，分布式版本控制系统的安全性要高很多，因为每个人电脑里都有完整的版本库，某一个人的电脑坏掉了不要紧，随便从其他人那里复制一个就可以了。而集中式版本控制系统的中央服务器要是出了问题，所有人都没法干活了。
 
-![](http://121.36.193.184:6789/imgs/2020/10/ae304bcf1db73902.jpg)
+![](.\images\ae304bcf1db73902.jpg)
 
 ### 二、安装Git
 
@@ -133,7 +133,7 @@ $ ssh-keygen -t rsa -C "youremail@example.com"
 登陆GitHub，打开“Account settings”，“SSH Keys”页面：
 
 然后，点“Add SSH Key”，填上任意Title，在Key文本框里粘贴`id_rsa.pub`文件的内容：
-![](http://121.36.193.184:6789/imgs/2020/10/fa4a7975a1ea3de1.png)
+![](.\images\fa4a7975a1ea3de1.png)
 
 验证是否成功，在git bash里输入下面的命令
 
@@ -141,7 +141,7 @@ $ ssh-keygen -t rsa -C "youremail@example.com"
 $ ssh -T git@github.com
 ```
 
-![](http://121.36.193.184:6789/imgs/2020/10/86fdb023f7509823.png)
+![](.\images\86fdb023f7509823.png)
 
 如果想查看你已经配置的远程仓库服务器，可以运行 `git remote` 命令
 
@@ -798,7 +798,7 @@ Git鼓励大量使用分支：
 
 当有多个分支，且分支做了不同的修改时，会变成这样：
 
-![](http://121.36.193.184:6789/imgs/2020/11/e4672cf7d6de9507.png)
+![](.\images\e4672cf7d6de9507.png)
 
 这种情况下，Git无法执行“快速合并”，只能试图把各自的修改合并起来，但这种合并就可能会有冲突，我们试试看：
 
@@ -850,7 +850,7 @@ $ git commit -m "conflict fixed"
 ```
 现在，master分支和feature1分支变成了下图所示：
 
-![](http://121.36.193.184:6789/imgs/2020/11/cb768f68ecfc0804.png)
+![](.\images\cb768f68ecfc0804.png)
 
 用带参数的`git log`也可以看到分支的合并情况：
 
@@ -929,7 +929,7 @@ $ git log --graph --pretty=oneline --abbrev-commit
 
 可以看到，不使用`Fast forward`模式，merge后就像这样：
 
-![](http://121.36.193.184:6789/imgs/2020/11/b7954a837df7139d.png)
+![](.\images\b7954a837df7139d.png)
 
 分支策略
 
@@ -943,7 +943,7 @@ $ git log --graph --pretty=oneline --abbrev-commit
 
 所以，团队合作的分支看起来就像这样：
 
-![](http://121.36.193.184:6789/imgs/2020/11/2e66bb0030802f7f.png)
+![](.\images\2e66bb0030802f7f.png)
 
 
 
